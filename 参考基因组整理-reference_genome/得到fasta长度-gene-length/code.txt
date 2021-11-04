@@ -1,0 +1,5 @@
+有时需要将fasta转为bed，就是统计长度就好了，但是利用samtools faidx这个功能，速度奇快，再配合一行Linux命令就搞定。
+
+awk '{print $1, 1, $2}' file | sed -e 's/ /\t/g' > out
+
+/home/fanyucai/software/samtools/samtools-v1.8/bin/samtools faidx gene.fa

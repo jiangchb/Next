@@ -1,0 +1,28 @@
+
+#超几何分布求p值
+enrich["pval"] <- phyper(enrich[,"ListHits"], enrich[,"PopHits"], 
+		enrich[,"PopTotal"]-enrich[,"PopHits"], enrich[,"ListTotal"], lower.tail=F)
+
+
+#我们通过一次分析，从100个总基因(其中位于A通路的有20个)中筛到了10个差异基因，其中位于A通路的基因有2个，不位于A中的有8个
+#问:1、出现该情况的概率是多少？
+#   2、该抽样过程是否是随机情况？
+
+#1、该情况的概率
+choose(20,2)*choose(80,8)/choose(100,10)
+#[1] 0.3181706
+#2、该情况是否为随机的
+phyper(q=2,
+       m=20,
+       n=80,
+       10)
+#[1] 0.6812201
+因为p=0.6812201>0.05,因此认为该过程为随机情况（这里计算的左侧累积概率）
+
+ListHits是位于A通路的基因
+PopHits其中位于A通路的总基因个数
+PopTotal总基因个数
+ListTotal总差异基因
+
+#p值求q值
+enrich["padj"] <- p.adjust(enrich[,"pval"], method="fdr")

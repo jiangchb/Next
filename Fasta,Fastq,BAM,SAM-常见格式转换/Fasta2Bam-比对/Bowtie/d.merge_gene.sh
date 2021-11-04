@@ -1,0 +1,1 @@
+cd /public/cluster2/works/intern/ccj_temp1/follow_up/Bowtie/HT2021-12003-3 && perl /public/cluster2/works/intern/ccj_temp1/follow_up/Bowtie/HT2021-12003-3/merge_counts_fpkm.pl -i ./ -o ./tmp_results 

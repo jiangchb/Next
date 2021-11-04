@@ -1,0 +1,19 @@
+clusterProfiler 
+是业界大神Y叔写的一个R包，可以用来做各种富集分析，如GO、KEGG、DO（Disease Ontology analysis）、Reactome pathway analysis以及GSEA富集分析等。
+而除了富集分析，他还可以非常方便的对富集分析结果进行可视化。
+几乎所有欧易的富集结果，里面都有
+https://www.jianshu.com/p/c45cc2e3890f
+
+FGNet介绍
+  FGNet（Functional Gene Networks derived from biological enrichment analyses）允许在基因或表达集列表上执行功能富集分析（FEA），并将结果转换为网络。
+由此产生的功能网络提供了基因/术语的生物学功能的概述，并且允许容易地看到基因之间的链接，簇之间的重叠，发现关键基因等。
+https://www.jianshu.com/p/5184d0b32202
+
+TCseq包 ！！！！！！！！！！！！！！！！！！！！！！！！！
+提供了一个统一的套件去处理不同时序类型的数据分析，可以应用于转录组或者像ATAC-seq，Chip-seq的表观基因组时序型数据分析。该包主要的集中于不同时间点的差异分析，时间趋势分析及可视化作图。
+https://www.jianshu.com/p/26332e4da742
+
+
+ggpubr
+今天花了很多时间整理这个包的绘图函数，不得不说这个基于ggplot2的包，是真的友好，很适合初学者。可能对于熟悉ggplot2的人来说，ggpubr的存在有些多余，但这并不妨碍它成为一个优秀的R包。
+https://www.jianshu.com/p/a9b7d5e35305

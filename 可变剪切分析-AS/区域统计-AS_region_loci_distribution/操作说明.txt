@@ -1,0 +1,32 @@
+根据外显子一键生成内含子
+#原则就是排除外显子就是内含子
+
+cat stringtie_merged.gtf |sed "s/exon_number/\t/" |cut -f1-9 |awk -F'\t' -v OFS='\t' '$3=="exon"'|awk -F'\t' -v OFS='\t' '{print $9"%%"$1"%%"$7,$4"%"$5}' |awk   -F'\t' -v OFS='\t' '{a[$1]=a[$1]","$2}END{for(i in a) print i"\t"a[i]}' |sed "s/,//" |awk -F'\t' -v OFS='\t' '{split($2,b,"[%]");for(i=1; i<=length(b); i++) print $1"\t"b[i]}' |sed 's/,/\t/' |awk -F'\t' -v OFS='\t' '$2!=""&&$3!=""' |sed 's/%%/\t/g' |awk -F'\t' -v OFS='\t' '{print $2,"Gnomon","exon",$4+1,$5-1,".",$3,".",$1}' >intron.gtf
+
+#长度就是终点-起点+1
+
+#绘制长度分布
+
+#取共同位置信息
+/home/fanyucai/software/bedtools/bedtools2/bin/intersectBed -a combined_circRNA.gff  -b transcriptome_exon.gff -wb
+
+#根据上面出现的结果，借助多列信息合并的辅助列进行去重，并且通过合并列多出信息来注释
+AS-stat.py
+
+#绘制位置分布
+
+R语言
+
+
+背景
+Considering the isoforms in the annotated loci, most
+of the splicing junctions (SJs) were found to reside in the
+coding regions (or coding sequence) (CDS) (137,112),
+while fewer SJs were observed in 5′ untranslated region
+(5′UTR) (3143) and 3′ untranslated region (3′UTR)
+(3030), highlighting that coding proteins were intensively
+influenced by A
+
+
+
+

@@ -1,0 +1,5 @@
+Conda 新建环境
+R 4.0
+conda create --name r4
+conda activate r4
+conda install -c conda-forge r-base

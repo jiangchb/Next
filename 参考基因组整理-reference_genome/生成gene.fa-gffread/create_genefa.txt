@@ -1,0 +1,1 @@
+/home/fanyucai/software/gffread/gffread/gffread -w gene.fa -g genome.fa gene.gff

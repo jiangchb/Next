@@ -1,0 +1,34 @@
+get_anno_for_heatmap2<-function(annocol,annorow=NULL,color=NULL,only.color=F){
+  require(plyr)
+  require(stringr)
+  if(is.null(color)){
+    require(RColorBrewer)
+    color=c(brewer.pal(12,"Set3"),brewer.pal(8,"Set2"),brewer.pal(9,"Set1"),brewer.pal(8,"Dark2"))
+  }
+  
+  # annocolor=do.call(as.list,list(x=annocol))
+  # annocolor=lapply(annocolor,function(x){if(is.factor(x)){x=levels(x);a=color[1:length(x)];names(a)=x;return(a)}else{x=unique(x);a=color[1:length(x)];names(a)=x;return(a)}})
+  # if(!is.null(annorow)){
+  #   annocolor.row<-do.call(as.list,list(x=annorow))
+  #   annocolor.row=lapply(annocolor.row,function(x){if(is.factor(x)){x=levels(x);a=color[1:length(x)];names(a)=x;return(a)}else{x=unique(x);a=color[1:length(x)];names(a)=x;return(a)}})
+  # }else{annocolor.row=NULL}
+  # annocolor=c(annocolor,annocolor.row)
+  annocolor_col<-as.list(annocol)
+  annocolor_row<-as.list(annorow)
+  annocolor<-c(annocol,annorow)
+  annocolor<-lapply(annocolor,function(x){if(is.factor(x)){x=levels(x);return(x)}else{x=unique(x);return(x)}})
+  annocolor<-do.call(c,annocolor)
+  annocolor<-data.frame(var_name=as.factor(str_replace(names(annocolor),"[0-9]{1,}$","")),
+                        var=annocolor,
+                        color=color[1:length(annocolor)])
+  annocolor<-split(annocolor,annocolor$var_name)
+  annocolor<-lapply(annocolor,function(x){a=x$var;b=as.character(x$color);names(b)=a;return(b)})
+  
+  
+  
+  if(only.color){
+    anno_res<-annocolor
+  }else{anno_res<-list(annocol=annocol,
+                       annorow=annorow,
+                       annocolor=annocolor)}
+  return(anno_res)

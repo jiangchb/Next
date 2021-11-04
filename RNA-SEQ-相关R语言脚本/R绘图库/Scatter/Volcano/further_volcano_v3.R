@@ -1,0 +1,163 @@
+#!/usr/bin/env Rscript
+#############################################
+#Author: Afan 
+#Creat Time: 2019-12-17
+#############################################
+usage = "\
+usage:
+    Rscript further_volcano.R  -i [DEG file]  -l [genelist file] -o ./Volcano
+input file format:
+    *genelist.xls*:
+    gene_id
+    CD133
+    OCT4
+"
+cat(usage)
+
+
+#==========parameter import==========
+suppressPackageStartupMessages(library(optparse))
+option_list = list(
+    make_option( c("-i", "--input" ), type = "character",
+        help = "The input differential gene file(force).  e.g. *-vs-*-all.gene.xls" ),
+    make_option( c("-p", "--pval" ), type = "double",default = 0.05,
+        help = "pValue ratio threshold, default: 0.05 ."),
+    make_option( c("-f", "--foldchange" ), type = "double",default = 2,
+        help = "foldchange threshold, default: 2 ."),
+    make_option( c("-l", "--genelist" ), type = "character" ,
+        help = "Genelist to display the gene symbol.  e.g. genelist.xls"),
+    make_option(c("-t", "--title"), type = "character", default = NULL,
+        help = "Graphic title and outputfile information: Group_A-vs-Group_B . "),
+    make_option( c("-o", "--outputdir" ),type="character", default = "./Volcano",
+        help="the output directory of Volcano results, default: ./Volcano ." )
+);
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+
+#==========import library==========
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(ggrepel))
+suppressPackageStartupMessages(library(oebio))
+
+
+#==========parameter check==========
+if (! is.null(opt$input) ) {
+    DEG <- read.delim(normalizePath(opt$input), header=T, sep="\t", check.names=F, quote="")
+}else {
+    print_help(opt_parser)
+    stop("diff file must be supplied, Volcano plot for groups will be skipped\n", call. = FALSE)
+}
+if ( is.null(opt$outputdir) ){
+    output_dir = "Volcano"
+}else{
+    if ( file.exists(opt$outputdir) ){
+        output_dir = opt$outputdir
+    }else{
+        output_dir = opt$outputdir
+        dir.create(output_dir)
+    }
+}
+if ( !is.null(opt$title) ){
+    title = opt$title
+}else {
+    title = "Volcano"
+}
+
+
+#==========Limitations==========
+if ( !is.null(DEG$pval) ){
+    DEG = plyr::rename(DEG, c("pval"="pValue"))
+}
+if ( !is.null(DEG$foldChange) ){
+    DEG = plyr::rename(DEG, c("foldChange"="FoldChange"))
+}
+columnlist = unlist( strsplit( "log2FoldChange,pValue", ",", perl = T) )
+for ( i in columnlist ){
+    if ( !i %in% colnames(DEG) ){stop("NO specified column found!")}
+}
+
+
+#==========Volcano function==========
+#remove extremum
+rownames(DEG)=DEG[,1]
+DEG$pValue[which(DEG$pValue < 5E-300 )] = 5E-300
+
+#replace the "-/Inf"
+if( "Inf" %in% DEG$log2FoldChange | "-Inf" %in% DEG$log2FoldChange){
+    tmp <- DEG[which(DEG$log2FoldChange != "Inf" & DEG$log2FoldChange != "-Inf"),]
+    max = max(tmp$log2FoldChange)
+    min = min(tmp$log2FoldChange)
+    DEG$log2FoldChange <- as.numeric(sub("-Inf", min, DEG$log2FoldChange))
+    DEG$log2FoldChange <- as.numeric(sub("Inf", max, DEG$log2FoldChange))
+}
+
+#preparation by screening
+logFC_cutoff = log(opt$foldchange, 2)
+DEG$change = as.factor(ifelse(DEG$pValue < opt$pval & abs(DEG$log2FoldChange) > logFC_cutoff, ifelse(DEG$log2FoldChange > logFC_cutoff ,'Up','Down'),'Filtered'))
+
+#add labels
+if ( !is.null(opt$genelist) ) {
+    labels <- read.delim(normalizePath(opt$genelist), header=T, sep="\t", check.names=F, quote="")
+    DEG$label <-''
+    DEG[match(labels[, 1], DEG[, 1]),]$label = as.character(labels[,1])
+    #
+    if (length(rownames(labels)) <= 15) {
+        #sort data
+        tmp1 <- DEG[which(DEG$label == ""),]
+        tmp2 <- DEG[which(DEG$label != ""),]
+        tmp2$change <- "Labels"
+        DEG <- rbind(tmp1,tmp2)
+        #
+        g = ggplot(data=DEG, aes(x=DEG$log2FoldChange, y=-log10(DEG$pValue), color=change)) + 
+        geom_point( size=1) + 
+        theme_set(theme_set(theme_bw(base_size=15))) + 
+        theme(legend.title=element_blank()) + 
+        labs(title = paste0(title, " : pvalue < ", opt$pval," && |log2FC| > ",round(log(opt$foldchange, 2), 2) )) + 
+        xlab(expression(paste(log[2], " fold change"))) + 
+        ylab(expression(paste("-", log[10], "pvalue"))) + 
+        theme(plot.title = element_text(hjust = 0.5)) + 
+        guides(shape=guide_legend(override.aes=list(size=4))) +
+        scale_colour_manual(values = c("Up"=c(oe_col_qua(2)), "Down"=c(oe_col_qua(3)),"Filtered"=c(oe_col_qua(8)),"Labels"=c("black")),na.translate=FALSE) + 
+        geom_label_repel(aes(label = label), size = 4, vjust=-0.5, force = 1,color = "black") + 
+        theme(panel.grid = element_blank())+
+        theme(text=element_text(size=14,family="serif")) +
+        coord_cartesian(xlim=c(-4,8)) 
+        
+    }else {
+        #sort data
+        tmp1 <- DEG[which(DEG$label == ""),]
+        tmp2 <- DEG[which(DEG$label != ""),]
+        tmp2$change <- "Labels"
+        DEG <- rbind(tmp1,tmp2)
+        g = ggplot(data=DEG, aes(x=DEG$log2FoldChange, y=-log10(DEG$pValue), color=change)) + 
+        geom_point(size=1) + 
+        theme_set(theme_set(theme_bw(base_size=15))) + 
+        theme(legend.title=element_blank()) + 
+        labs(title = paste0(title, " : pvalue < ",opt$pval," && |log2FC| > ", round(log(opt$foldchange, 2), 2) )) + 
+        xlab(expression(paste(log[2], " fold change"))) + 
+        ylab(expression(paste("-", log[10], "pvalue"))) + 
+        theme(plot.title = element_text(hjust = 0.5)) + 
+        guides(shape=guide_legend(override.aes=list(size=4))) +
+        scale_colour_manual(values = c("Up"=c(oe_col_qua(2)), "Down"=c(oe_col_qua(3)),"Filtered"=c(oe_col_qua(8)),"Labels"=c(oe_col_qua(5))),na.translate=FALSE) + 
+        theme(panel.grid = element_blank()) 
+    }
+}else {
+    g = ggplot(data=DEG, aes(x=DEG$log2FoldChange, y=-log10(DEG$pValue), color=change)) + 
+    geom_point( size=1) + 
+    theme_set(theme_set(theme_bw(base_size=15))) + 
+    theme(legend.title=element_blank()) + 
+    labs(title = paste0(title, " : pvalue < ",opt$pval," && |log2FC| > ", round(log(opt$foldchange, 2), 2) )) + 
+    xlab(expression(paste(log[2], " fold change"))) + 
+    ylab(expression(paste("-", log[10], "pvalue"))) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    guides(shape=guide_legend(override.aes=list(size=4))) +
+    scale_colour_manual(values = c("Up"=c(oe_col_qua(2)), "Down"=c(oe_col_qua(3)),"Filtered"=c(oe_col_qua(8)))) + theme(panel.grid = element_blank()) 
+}
+
+#lines
+g = g + geom_hline(yintercept = -log(opt$pval, 10), linetype = "solid", color = c(oe_col_qua(8)), size = 0.5) + geom_vline(xintercept = c(-logFC_cutoff, logFC_cutoff), linetype = "solid", color = c(oe_col_qua(8)), size = 0.5)
+#
+ggsave(file.path(output_dir, paste(title,"-volcano-pval-",opt$pval,"-FC-",opt$foldchange,".gene.pdf",sep="")),height=10,width=10,plot=g)
+ggsave(file.path(output_dir, paste(title,"-volcano-pval-",opt$pval,"-FC-",opt$foldchange,".gene.png",sep="")),height=10,width=10,plot=g,dpi=1000)
+

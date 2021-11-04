@@ -1,0 +1,2 @@
+bowtie比对出Sam文件
+eXpress出counts

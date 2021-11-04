@@ -1,0 +1,2 @@
+gffread my.gtf3 -T -o my.gtf
+gffread merged.gtf -o- > merged.gff3

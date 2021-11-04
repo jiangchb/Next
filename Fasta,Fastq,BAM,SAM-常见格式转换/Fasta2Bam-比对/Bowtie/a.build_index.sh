@@ -1,0 +1,1 @@
+/home/fanyucai/software/Anaconda3/bin/bowtie2-build /public/cluster2/works/intern/ccj_temp1/follow_up/Bowtie/HT2021-12003-3/target.fa /public/cluster2/works/intern/ccj_temp1/follow_up/Bowtie/HT2021-12003-3/target.fa

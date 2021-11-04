@@ -1,0 +1,28 @@
+一、fasta <=> sam
+1. fasta => sam
+
+# bowtie2比对获得sam文件
+bowtie2 -1 *_1.fastq -2 *_2.fastq -p 16 -x prefix -S *.sam
+2. fasta <= sam
+
+cat *.fasta | awk -F"\t" '{print ">"$1"\n"$10}' > *.sam
+二、sam <=> bam
+1. sam => bam
+
+# -@：线程
+# -b：输出格式为BAM
+# -S：自动检测输入格式
+# -o：输出文件
+samtools view -@ 16 -b -S final.sam -o final.bam
+2. sam <= bam
+
+samtools view *.bam -O SAM > *.sam
+三、fasta <=> bam
+1. fasta => bam
+
+# bam -> fq -> fa
+bam2fastq --aligned *.bam -o *.fq
+2. fasta <= bam
+
+samtools view *.bam -O SAM |  awk -F"\t" '{print ">"$1"\n"$10}' > *.fa
+
