@@ -58,21 +58,21 @@ tj = len(sequence_2)
 
 while(ti >0 and tj > 0):
 
-    if (ti >0 and tj > 0 and main_matrix[ti][tj] == main_matrix[ti-1][tj-1]+ match_checker_matrix[ti-1][tj-1]):
+    if (ti >0 and tj > 0 and main_matrix[ti][tj] == main_matrix[ti-1][tj-1]+ match_checker_matrix[ti-1][tj-1]): # if it is a match or mismatch
 
-        aligned_1 = sequence_1[ti-1] + aligned_1
+        aligned_1 = sequence_1[ti-1] + aligned_1 # put the sequence here
         aligned_2 = sequence_2[tj-1] + aligned_2
 
         ti = ti - 1
         tj = tj - 1
     
-    elif(ti > 0 and main_matrix[ti][tj] == main_matrix[ti-1][tj] + gap_penalty):
-        aligned_1 = sequence_1[ti-1] + aligned_1
-        aligned_2 = "-" + aligned_2
+    elif(ti > 0 and main_matrix[ti][tj] == main_matrix[ti-1][tj] + gap_penalty): # if it is given by vertical penalty
+        aligned_1 = sequence_1[ti-1] + aligned_1  # then it is a gap in sequence 2
+        aligned_2 = "-" + aligned_2 
 
         ti = ti -1
-    else:
-        aligned_1 = "-" + aligned_1
+    else:  # if it is given by horizontal penalty
+        aligned_1 = "-" + aligned_1  # then it is a gap in sequence 1
         aligned_2 = sequence_2[tj-1] + aligned_2
 
         tj = tj - 1
